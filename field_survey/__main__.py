@@ -1,6 +1,6 @@
 import json
 import sys
-from .meter import inspect_record
+from .survey import inspect_record
 
 def main():
     sample = {"source": "station-a", "key": "demo-01", "revision": 1, "value": "synthetic"}

@@ -21,4 +21,4 @@ def inspect_record(raw: dict[str, Any]) -> dict[str, Any]:
     if isinstance(revision, bool) or not isinstance(revision, int) or revision < 0:
         raise ValueError("revision must be a non-negative integer")
     item = Observation(source, key, revision, raw["value"])
-    return {"source": item.source, "key": item.key, "revision": item.revision, "value": item.value, "event": "reading_quality"}
+    return {"source": item.source, "key": item.key, "revision": item.revision, "value": item.value, "event": "transform_history"}
