@@ -1,0 +1,12 @@
+{
+  "srs": 4326,
+  "layers": [
+    "points",
+    "unknown_layer"
+  ],
+  "point": [
+    120.2,
+    30.1
+  ],
+  "journal_mode": "WAL"
+}

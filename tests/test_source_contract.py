@@ -13,12 +13,20 @@ class SourceContractTests(unittest.TestCase):
         records = scenario["source_records"]
         with serve(scenario) as origin:
             client = Client(origin.base_url)
-            self.assertEqual(records[0]["package_id"], records[1]["package_id"])
-            self.assertIsNone(records[1]["crs"])
-            for member in records[0]["manifest"]:
-                self.assertEqual(client.fetch("/packages/PK-21/" + member).status, 200)
-            transforms = json.loads(client.fetch("/transforms").body)
-            self.assertNotEqual(transforms["shift-v1"], transforms["shift-v2"])
+            import tempfile
+            import sqlite3
+            from pathlib import Path
+            from field_survey.geopackage_fixture import build
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "survey.gpkg"
+                writer = build(path)
+                try:
+                    self.assertEqual(writer.execute("PRAGMA journal_mode").fetchone()[0], "wal")
+                    self.assertEqual(writer.execute("SELECT srs_id FROM gpkg_geometry_columns WHERE table_name='points'").fetchone()[0], 4326)
+                    self.assertEqual(bytes(writer.execute("SELECT geom FROM points LIMIT 1").fetchone()[0])[:2], b"GP")
+                    self.assertTrue(Path(str(path) + "-wal").exists())
+                finally:
+                    writer.close()
 
     def test_every_record_has_the_declared_source_identity(self):
         scenario = load_scenario()

@@ -2,7 +2,7 @@
 
 ## 记录与身份
 
-默认来源入口为 `/feed`，媒体格式为 `json`。来源身份字段是 `device`、`package_id`、`point`。这些字段表示来源自身声明，不等同于已经解决的业务实体身份。输入顺序是一次接收的观察顺序，并不保证业务修订有序。
+默认来源入口为 `/feed`，媒体格式为 `json`。来源身份字段是 `device`、`delivery`、`layer`。这些字段表示来源自身声明，不等同于已经解决的业务实体身份。输入顺序是一次接收的观察顺序，并不保证业务修订有序。
 
 `/observations/1` 等地址允许逐条读取合成观察，返回 `items` 数组。正文、页内嵌入数据与CSV均保留供方原文，不在协议层推断当前有效值。网页中的 `source-records` 是门户向下载客户端提供的公开数据块；表单还带有隐藏控件，令牌用于本地协议状态检查。
 
@@ -18,8 +18,12 @@
 
 ## 领域样例
 
-- `partial_package`：成员未齐及同名包重打；业务侧关注身份与完整性核实后再接收。
-- `missing_crs`：部分点缺原始基准；业务侧关注单点待核且不空间猜测。
-- `recompute_failure`：重算一半断电且已有审核导出；业务侧关注已审核依据不变，导出代次自洽。
+- `wal_snapshot`：源仍有连接并提交WAL；业务侧关注同批元数据与记录属于同一快照。
+- `restart_cursor`：分批领取途中退出且源继续变化；业务侧关注不把另一快照的偏移当续接证明。
+- `layer_isolation`：一层含未知几何扩展；业务侧关注明确隔离该层，保留其他自洽层。
 
-另外提供 `/packages/PK-21/points.csv`、`/packages/PK-21/notes.txt`、`/transforms`。响应内容和版本由场景文件逐项声明，便于核对实际收到的来源资料。
+## 领域接入契约
+
+GeoPackage输入由geopackage_fixture.py按本地配方生成真实SQLite文件，保留WAL写连接可模拟编辑中接收。基础场景包含POINT图层和未知扩展图层，不做坐标转换。gpkg_contents、gpkg_geometry_columns、gpkg_spatial_ref_sys及GeoPackageBinary头依据OGC GeoPackage标准。
+
+可用 `python3 -c 'from field_survey.geopackage_fixture import build; connection=build("sample.gpkg"); connection.close()'` 生成样例。测试调用同一函数并保持写连接，以核对尚在WAL中的提交。生成器只创建来源样例，不进行接入解析。

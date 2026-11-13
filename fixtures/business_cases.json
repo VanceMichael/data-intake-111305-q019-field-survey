@@ -1,17 +1,17 @@
 [
   {
-    "name": "partial_package",
-    "situation": "成员未齐及同名包重打",
-    "observable": "身份与完整性核实后再接收"
+    "name": "wal_snapshot",
+    "situation": "源仍有连接并提交WAL",
+    "observable": "同批元数据与记录属于同一快照"
   },
   {
-    "name": "missing_crs",
-    "situation": "部分点缺原始基准",
-    "observable": "单点待核且不空间猜测"
+    "name": "restart_cursor",
+    "situation": "分批领取途中退出且源继续变化",
+    "observable": "不把另一快照的偏移当续接证明"
   },
   {
-    "name": "recompute_failure",
-    "situation": "重算一半断电且已有审核导出",
-    "observable": "已审核依据不变，导出代次自洽"
+    "name": "layer_isolation",
+    "situation": "一层含未知几何扩展",
+    "observable": "明确隔离该层，保留其他自洽层"
   }
 ]
