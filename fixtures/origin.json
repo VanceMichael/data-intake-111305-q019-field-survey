@@ -1,0 +1,215 @@
+{
+  "identity_fields": [
+    "device",
+    "package_id",
+    "point"
+  ],
+  "source_records": [
+    {
+      "device": "survey-old",
+      "package_id": "PK-21",
+      "point": "P1",
+      "member": "points.csv",
+      "raw_x": "120.2",
+      "raw_y": "30.1",
+      "crs": "LOCAL-A",
+      "transform": "shift-v1",
+      "manifest": [
+        "points.csv",
+        "notes.txt"
+      ]
+    },
+    {
+      "device": "survey-old",
+      "package_id": "PK-21",
+      "point": "P2",
+      "member": "points.csv",
+      "raw_x": "120.3",
+      "raw_y": "30.2",
+      "crs": null,
+      "transform": null,
+      "manifest": [
+        "points.csv",
+        "notes.txt"
+      ]
+    },
+    {
+      "device": "survey-new",
+      "package_id": "PK-22",
+      "point": "P1",
+      "member": "points.csv",
+      "raw_x": "120.25",
+      "raw_y": "30.15",
+      "crs": "TARGET",
+      "transform": "identity",
+      "manifest": [
+        "points.csv"
+      ]
+    }
+  ],
+  "portal": {
+    "csrf": "form-2026-b"
+  },
+  "routes": {
+    "/feed": {
+      "json": {
+        "items": [
+          {
+            "device": "survey-old",
+            "package_id": "PK-21",
+            "point": "P1",
+            "member": "points.csv",
+            "raw_x": "120.2",
+            "raw_y": "30.1",
+            "crs": "LOCAL-A",
+            "transform": "shift-v1",
+            "manifest": [
+              "points.csv",
+              "notes.txt"
+            ]
+          },
+          {
+            "device": "survey-old",
+            "package_id": "PK-21",
+            "point": "P2",
+            "member": "points.csv",
+            "raw_x": "120.3",
+            "raw_y": "30.2",
+            "crs": null,
+            "transform": null,
+            "manifest": [
+              "points.csv",
+              "notes.txt"
+            ]
+          },
+          {
+            "device": "survey-new",
+            "package_id": "PK-22",
+            "point": "P1",
+            "member": "points.csv",
+            "raw_x": "120.25",
+            "raw_y": "30.15",
+            "crs": "TARGET",
+            "transform": "identity",
+            "manifest": [
+              "points.csv"
+            ]
+          }
+        ]
+      },
+      "headers": {
+        "ETag": "feed-1"
+      }
+    },
+    "/rate-limited": {
+      "status": 429,
+      "headers": {
+        "Retry-After": "2"
+      },
+      "json": {
+        "error": "quota"
+      }
+    },
+    "/unstable": [
+      {
+        "status": 503,
+        "body": "temporarily unavailable"
+      },
+      {
+        "json": {
+          "items": []
+        }
+      }
+    ],
+    "/range": {
+      "body": "0123456789",
+      "range": true
+    },
+    "/range-ignored": {
+      "body": "0123456789"
+    },
+    "/truncated": {
+      "body": "partial",
+      "truncate": true
+    },
+    "/packages/PK-21/points.csv": {
+      "body": "point,x,y,crs\nP1,120.2,30.1,LOCAL-A\nP2,120.3,30.2,\n",
+      "content_type": "text/csv"
+    },
+    "/packages/PK-21/notes.txt": {
+      "body": "synthetic field notes\n",
+      "content_type": "text/plain"
+    },
+    "/transforms": {
+      "json": {
+        "shift-v1": {
+          "dx": "0.01",
+          "dy": "-0.01"
+        },
+        "shift-v2": {
+          "dx": "0.02",
+          "dy": "-0.02"
+        }
+      }
+    },
+    "/observations/1": {
+      "json": {
+        "items": [
+          {
+            "device": "survey-old",
+            "package_id": "PK-21",
+            "point": "P1",
+            "member": "points.csv",
+            "raw_x": "120.2",
+            "raw_y": "30.1",
+            "crs": "LOCAL-A",
+            "transform": "shift-v1",
+            "manifest": [
+              "points.csv",
+              "notes.txt"
+            ]
+          }
+        ]
+      }
+    },
+    "/observations/2": {
+      "json": {
+        "items": [
+          {
+            "device": "survey-old",
+            "package_id": "PK-21",
+            "point": "P2",
+            "member": "points.csv",
+            "raw_x": "120.3",
+            "raw_y": "30.2",
+            "crs": null,
+            "transform": null,
+            "manifest": [
+              "points.csv",
+              "notes.txt"
+            ]
+          }
+        ]
+      }
+    },
+    "/observations/3": {
+      "json": {
+        "items": [
+          {
+            "device": "survey-new",
+            "package_id": "PK-22",
+            "point": "P1",
+            "member": "points.csv",
+            "raw_x": "120.25",
+            "raw_y": "30.15",
+            "crs": "TARGET",
+            "transform": "identity",
+            "manifest": [
+              "points.csv"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

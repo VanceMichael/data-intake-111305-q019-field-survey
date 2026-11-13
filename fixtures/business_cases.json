@@ -1,0 +1,17 @@
+[
+  {
+    "name": "partial_package",
+    "situation": "成员未齐及同名包重打",
+    "observable": "身份与完整性核实后再接收"
+  },
+  {
+    "name": "missing_crs",
+    "situation": "部分点缺原始基准",
+    "observable": "单点待核且不空间猜测"
+  },
+  {
+    "name": "recompute_failure",
+    "situation": "重算一半断电且已有审核导出",
+    "observable": "已审核依据不变，导出代次自洽"
+  }
+]
