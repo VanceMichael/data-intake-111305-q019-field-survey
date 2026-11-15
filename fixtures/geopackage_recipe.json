@@ -2,11 +2,15 @@
   "srs": 4326,
   "layers": [
     "points",
+    "track_points",
+    "conflicted_layer",
     "unknown_layer"
   ],
   "point": [
     120.2,
     30.1
   ],
-  "journal_mode": "WAL"
+  "track_point_rows": 250,
+  "journal_mode": "WAL",
+  "notes": "points 含正常点、缺失几何、空几何与三种不支持扩展记录；track_points 为分批领取演练大表；conflicted_layer 两处 srs 声明冲突；unknown_layer 使用未注册 srs 与未知扩展"
 }

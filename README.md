@@ -35,6 +35,19 @@ python3 -m field_survey capture --base-url http://127.0.0.1:实际端口 --archi
 
 归档库只追加来源观察，不用最后一条响应覆盖先前响应。`archive.py` 管理原始内容及完整性，`client.py` 执行一次请求，`decoding.py` 负责来源格式解码，`origin.py` 提供协议演练。业务解释可与原始接收独立演进。
 
+## GeoPackage 只读一致快照采集
+
+巡测工作台直接交付 `.gpkg` 时，采集端以 SQLite 只读模式（`mode=ro` 加 `query_only`）打开来源文件：不复制正在写入的主文件冒充完整数据库，WAL 中已提交的内容同样是来源事实。一次接收先在同一个读取事务内识别 `gpkg_contents`、`gpkg_geometry_columns` 与 `gpkg_spatial_ref_sys`，再按该快照分批领取选定图层；元数据与记录始终来自同一份快照，不会出现"主表是新的、几何列说明是旧的"这类跨快照拼接。采集端不写回、不修改源库。
+
+```sh
+python3 -m field_survey gpkg-demo                 # 本地演练：编辑并发、进程恢复、不支持几何
+python3 -m field_survey gpkg-collect --package survey.gpkg --journal .runtime/collection.sqlite3 --batch-size 500
+python3 -m field_survey gpkg-collect --package survey.gpkg --journal .runtime/collection.sqlite3 --layer points
+python3 -m field_survey gpkg-export --journal .runtime/collection.sqlite3 --out export.json
+```
+
+`geopackage.py` 负责只读快照接入与 GeoPackageBinary/WKB 解析；`collection.py` 是采集端自己的本地台账小库，记录保留包身份、图层、主键与原始几何，进度按（快照，图层）保存——进程退出后继续时，另一份快照没有可沿用的偏移，图层重新领取。空间参考声明冲突或使用未知扩展的图层被隔离，其余自洽图层照常采集。空几何、缺失几何与不支持的扩展分别标记，坐标只取自 WKB 原文，不从显示范围猜测位置，不做坐标变换。导出清单说明本批记录基于哪份快照、哪些层被隔离。
+
 ## 开发资料
 
 来源协议见 `docs/source-protocol.md`，领域观察关系见 `tests/test_source_contract.py`。`fixtures/business_cases.json` 保存业务侧关注的交错情况及可观察口径；基础版测试验证的是原始采集和协议，不代表业务处理已经具备这些能力。所有条目、机构、文件内容和门户回执均为本地合成资料，不包含真实用户身份。

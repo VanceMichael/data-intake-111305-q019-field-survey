@@ -33,6 +33,18 @@ def main():
     collector.add_argument("--path", default="/feed")
     server = subcommands.add_parser("serve")
     server.add_argument("--scenario", type=Path)
+    gpkg_collect = subcommands.add_parser("gpkg-collect", help="GeoPackage 只读一致快照采集")
+    gpkg_collect.add_argument("--package", type=Path, required=True)
+    gpkg_collect.add_argument("--journal", type=Path, required=True)
+    gpkg_collect.add_argument("--layer", action="append")
+    gpkg_collect.add_argument("--batch-size", type=int, default=500)
+    gpkg_collect.add_argument("--max-batches", type=int)
+    gpkg_export = subcommands.add_parser("gpkg-export", help="导出一批记录及其快照身份")
+    gpkg_export.add_argument("--journal", type=Path, required=True)
+    gpkg_export.add_argument("--out", type=Path)
+    gpkg_export.add_argument("--snapshot-id", type=int)
+    gpkg_demo = subcommands.add_parser("gpkg-demo", help="本地演练编辑并发、进程恢复与不支持几何")
+    gpkg_demo.add_argument("--workdir", type=Path)
     args = parser.parse_args()
     if args.command == "demo":
         with tempfile.TemporaryDirectory() as temporary, serve() as origin:
@@ -40,6 +52,24 @@ def main():
             print(json.dumps({"operation": "raw_capture", **result}, ensure_ascii=False, indent=2))
     elif args.command == "capture":
         print(json.dumps(capture(args.base_url, args.archive, args.source, args.path), ensure_ascii=False, indent=2))
+    elif args.command == "gpkg-collect":
+        from .collection import collect_package
+        result = collect_package(args.package, args.journal, layers=args.layer, batch_size=args.batch_size, max_batches=args.max_batches)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    elif args.command == "gpkg-export":
+        from .collection import export_collection
+        manifest = export_collection(args.journal, args.out, args.snapshot_id)
+        result = {
+            "snapshot_id": manifest["snapshot"]["id"],
+            "snapshot_token": manifest["snapshot"]["token"],
+            "layers": len(manifest["layers"]),
+            "quarantined_layers": manifest["quarantined_layers"],
+            "records": len(manifest["records"]),
+        }
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    elif args.command == "gpkg-demo":
+        from .showcase import run
+        print(json.dumps(run(args.workdir), ensure_ascii=False, indent=2))
     else:
         from .origin import load_scenario
         with serve(load_scenario(args.scenario)) as origin:

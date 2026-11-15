@@ -24,6 +24,8 @@
 
 ## 领域接入契约
 
-GeoPackage输入由geopackage_fixture.py按本地配方生成真实SQLite文件，保留WAL写连接可模拟编辑中接收。基础场景包含POINT图层和未知扩展图层，不做坐标转换。gpkg_contents、gpkg_geometry_columns、gpkg_spatial_ref_sys及GeoPackageBinary头依据OGC GeoPackage标准。
+GeoPackage输入由geopackage_fixture.py按本地配方生成真实SQLite文件，保留WAL写连接可模拟编辑中接收。基础场景包含POINT图层（正常点、缺失几何、空几何与三种不支持扩展记录）、轨迹大表、空间参考声明冲突图层和未知扩展图层，不做坐标转换。gpkg_contents、gpkg_geometry_columns、gpkg_spatial_ref_sys及GeoPackageBinary头依据OGC GeoPackage标准。
+
+接入侧由geopackage.py以`mode=ro`加`query_only`只读打开来源，不复制正在写入的主文件冒充完整数据库，WAL中已提交的内容同样是来源事实。同一读取事务内先识别gpkg_contents、几何列与空间参考，再按该快照领取选定图层；快照身份取自WAL盐值、帧数与主库变更计数，事务首尾各取一次文件事实，不一致则回滚重试。collection.py把包身份、快照、图层状态、原始记录与按（快照，图层）保存的进度写入本地台账；另一份快照没有可继承的偏移，进程恢复时只能重新领取。空间参考声明冲突或使用未知扩展的图层被隔离，其余自洽图层照常采集。空几何、缺失几何与不支持的扩展分别标记，坐标只取自WKB原文，不从显示范围猜测位置。导出清单说明本批记录基于哪份快照、哪些层被隔离。
 
 可用 `python3 -c 'from field_survey.geopackage_fixture import build; connection=build("sample.gpkg"); connection.close()'` 生成样例。测试调用同一函数并保持写连接，以核对尚在WAL中的提交。生成器只创建来源样例，不进行接入解析。
